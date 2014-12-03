@@ -126,7 +126,7 @@ void inverse(float a[100][100],float d[100][100],int n,float det){
 int main(void){
 	int i,j,n;
 	float a[100][100],d[100][100],deter;
-	cout<<"\n C Program To Find Inverse Of Matrix\n\n"; 
+	cout<<"\n C++ Program To Find Inverse Of Matrix\n\n"; 
 	n = scanf(a);	// read function
 	int print_matrix = 1;
 	printf(a,n,print_matrix);	// read function
