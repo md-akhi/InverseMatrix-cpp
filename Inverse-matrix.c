@@ -54,7 +54,7 @@ void minor(float b[100][100],float a[100][100],int i,int n){
 }// end function
 
 //---------------------------------------------------
-//	calculate determinte of matrix
+//	calculate determinant of matrix
 float det(float a[100][100],int n){
 	int i;
 	float b[100][100],sum=0;
@@ -65,7 +65,7 @@ return (a[0][0]*a[1][1]-a[0][1]*a[1][0]);
 	else
 		for(i=0;i<n;i++){
 			minor(b,a,i,n);	// read function
-			sum = (float) (sum+a[0][i]*pow(-1,i)*det(b,(n-1)));	// read function	// sum = determinte matrix
+			sum = (float) (sum+a[0][i]*pow(-1,i)*det(b,(n-1)));	// read function	// sum = determinant matrix
 		}
 return sum;
 }// end function
@@ -85,7 +85,7 @@ void transpose(float c[100][100],float d[100][100],float n,float det){
 
 //---------------------------------------------------
 //	calculate cofactor of matrix
-void cofactor(float a[100][100],float d[100][100],float n,float determinte){
+void cofactor(float a[100][100],float d[100][100],float n,float determinant){
 	float b[100][100],c[100][100];
 	int l,h,m,k,i,j;
 	for (h=0;h<n;h++)
@@ -105,7 +105,7 @@ void cofactor(float a[100][100],float d[100][100],float n,float determinte){
 					}
 			c[h][l] = pow(-1,(h+l))*det(b,(n-1));	// c = cofactor Matrix
 		}
-	transpose(c,d,n,determinte);	// read function
+	transpose(c,d,n,determinant);	// read function
 }// end function
 
 //---------------------------------------------------
