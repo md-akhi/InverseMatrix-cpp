@@ -1,142 +1,184 @@
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 
 //----------------------------------------------------------
 //read matrix : cin>> in c++ , scanf() in c
-int cin(float a[100][100]){
-	int i,j,n;
-	printf("\n Enter Length Of Matrix N*N : ");
-	scanf("%d",&n);
-	printf("\n--------------------------\n");
-	for(i=0;i<n;i++)
-		for(j=0;j<n;j++){
-			printf(" Matrix[%d][%d] : ",i+1,j+1);
-			scanf("%f",&a[i][j]);
+int Cin(float cinMatrix[30][30], char **argv, int argc){
+	int row, col, sizeMatrix;
+	if (argc == 1){
+		printf(" Enter the size of matrix N*N: ");
+		scanf("%d", &sizeMatrix);
+		printf("\n ------------------------------ \n");
+		printf(" Enter the elements of matrix: \n");
+		for (row = 0; row < sizeMatrix; row++){
+			for (col = 0; col < sizeMatrix; col++){
+				printf(" M[%d][%d]: ", row+1, col+1);
+				scanf("%f", &cinMatrix[row][col]);
+			}
+			printf(" \n ");
 		}
-	printf("\n----------------------------------------------------\n");
-return n;
+	}
+	else {
+		FILE *fp = fopen(argv[1], "r");
+		fscanf(fp, "%d", &sizeMatrix);
+		for (row = 0; row < sizeMatrix; row++){
+			for (col = 0; col < sizeMatrix; col++){
+				fscanf(fp, "%f", &cinMatrix[row][col]);
+			}
+		}
+		fclose(fp);
+	}
+	printf("\n ------------------------------ \n");
+	return sizeMatrix;
 }
 
 //-----------------------------------------------------
 // show matrix : cout<< in c++ , printf() in c
-void cout(float a[100][100],int n,int show){
-	int i,j;
-	if(show == 1)
-		for(i=0;i < n;i++){
-			for(j=0;j < n;j++)
-				printf(" %.2f \t",a[i][j]);
-			printf("\n");
-		}
-	else if(show == 2){
-		printf("\n\n The Inverse Of Matrix Is : \n\n");
-		for (i=0;i<n;i++){
-			for (j=0;j<n;j++)
-				printf(" %.4f \t",a[i][j]);
-			printf("\n");
+void Cout(float coutMatrix[30][30], int sizeMatrix, int show, float determinte, float transposeMatrix[30][30]){
+	int row, col;
+	if(show == 1){ // print matrix
+		for(row=0; row < sizeMatrix; row++){
+			for(col=0; col < sizeMatrix; col++){
+				printf(" %.1f \t ", coutMatrix[row][col]);
+			}
+			printf(" \n ");
 		}
 	}
+	else if(show == 2){ // print inverse
+		printf("\n The inverse Of matrix is: \n\n");
+		for (row=0; row <sizeMatrix; row++){
+			for (col=0; col < sizeMatrix; col++){
+				printf(" M[%d][%d]: %.1f/%.1f (%.2f) \t ", row+1, col+1,transposeMatrix[row][col], determinte, coutMatrix[row][col]);
+			}
+			printf(" \n ");
+		}
+	}
+  return;
 }
 
 //---------------------------------------------------
 //	calculate minor of matrix OR build new matrix : k-had = minor
-void minor(float b[100][100],float a[100][100],int i,int n){
-	int j,l,h=0,k=0;
-	for(l=1;l<n;l++)
-		for( j=0;j<n;j++){
-			if(j == i)
+void Minor(float minorMatrix[30][30], int colMatrix, int sizeMatrix, float newMinorMatrix[30][30]){
+	int col, row,
+		row2 = 0,
+		col2 = 0;
+	for(row=1; row < sizeMatrix; row++){
+		for( col=0; col < sizeMatrix; col++){
+			if(col == colMatrix){
 				continue;
-			b[h][k] = a[l][j];
-			k++;
-			if(k == (n-1)){
-				h++;
-				k=0;
+			}
+			newMinorMatrix[row2][col2] = minorMatrix[row][col];
+			col2++;
+			if(col2 == (sizeMatrix - 1)){
+				row2++;
+				col2 = 0;
 			}
 		}
+	}
+  return;
 }// end function
 
 //---------------------------------------------------
 //	calculate determinte of matrix
-float det(float a[100][100],int n){
-	int i;
-	float b[100][100],sum=0;
-	if (n == 1)
-return a[0][0];
-	else if(n == 2)
-return (a[0][0]*a[1][1]-a[0][1]*a[1][0]);
-	else
-		for(i=0;i<n;i++){
-			minor(b,a,i,n);	// read function
-			sum = (float) (sum+a[0][i]*pow(-1,i)*det(b,(n-1)));	// read function	// sum = determinte matrix
+float Determinte(float minorMatrix[30][30], int sizeMatrix){
+	int col;
+	float sum = 0,
+		newMinorMatrix[30][30];
+	if (sizeMatrix == 1){
+		return minorMatrix[0][0];
+	}
+	else if(sizeMatrix == 2){
+		return (minorMatrix[0][0] * minorMatrix[1][1] - minorMatrix[0][1] * minorMatrix[1][0]);
+	}
+	else {
+		for(col=0; col < sizeMatrix; col++){
+			Minor(minorMatrix, col, sizeMatrix, newMinorMatrix);	// function
+			sum += (float) (minorMatrix[0][col] * pow(-1, col) * Determinte(newMinorMatrix, (sizeMatrix - 1)));	// function
 		}
-return sum;
+	}
+	return sum;
 }// end function
 
 //---------------------------------------------------
 //	calculate transpose of matrix
-void transpose(float c[100][100],float d[100][100],float n,float det){
-	int i,j;
-	float b[100][100];
-	for (i=0;i<n;i++)
-		for (j=0;j<n;j++)
-			b[i][j] = c[j][i];
-	for (i=0;i<n;i++)
-		for (j=0;j<n;j++)
-			d[i][j] = b[i][j]/det;	// array d[][] = inverse matrix
+void Transpose(float cofactorMatrix[30][30], float sizeMatrix, float determinte, float coutMatrix[30][30], float transposeMatrix[30][30]){
+	int row, col;
+	for (row=0; row < sizeMatrix; row++){
+		for (col=0; col < sizeMatrix; col++){
+			transposeMatrix[row][col] = cofactorMatrix[col][row];
+			coutMatrix[row][col] = cofactorMatrix[col][row] / determinte; // adjoint method
+		}
+	}
+  return;
 }// end function
 
 //---------------------------------------------------
 //	calculate cofactor of matrix
-void cofactor(float a[100][100],float d[100][100],float n,float determinte){
-	float b[100][100],c[100][100];
-	int l,h,m,k,i,j;
-	for (h=0;h<n;h++)
-		for (l=0;l<n;l++){
-			m=0;
-			k=0;
-			for (i=0;i<n;i++)
-				for (j=0;j<n;j++)
-					if (i != h && j != l){
-						b[m][k]=a[i][j];
-						if (k<(n-2))
-							k++;
-						else{
-							k=0;
-							m++;
+void Cofactor(float cinMatrix[30][30], float sizeMatrix, float determinte, float coutMatrix[30][30], float transposeMatrix[30][30]){
+	float minorMatrix[30][30],
+		cofactorMatrix[30][30];
+	int col3, row3, row2, col2, row, col;
+	for (row3=0; row3 < sizeMatrix; row3++){
+		for (col3=0; col3 < sizeMatrix; col3++){
+			row2 =0;
+			col2 = 0;
+			for (row=0; row < sizeMatrix; row++){
+				for (col=0; col < sizeMatrix; col++){
+					if (row != row3 && col != col3){
+						minorMatrix[row2][col2] = cinMatrix[row][col];
+						if (col2 < (sizeMatrix - 2)){
+							col2++;
+						}
+						else {
+							col2 = 0;
+							row2++;
 						}
 					}
-			c[h][l] = pow(-1,(h+l))*det(b,(n-1));	// c = cofactor Matrix
+				}
+			}
+			cofactorMatrix[row3][col3] = pow(-1, (row3 + col3)) * Determinte(minorMatrix, (sizeMatrix - 1));
 		}
-	transpose(c,d,n,determinte);	// read function
+	}
+	Transpose(cofactorMatrix, sizeMatrix, determinte, coutMatrix, transposeMatrix);	// function
+  return;
 }// end function
 
 //---------------------------------------------------
 //	calculate inverse of matrix
-void inverse(float a[100][100],float d[100][100],int n,float det){
-	if(det == 0)
-		printf("\nInverse of Entered Matrix is not possible\n");
-	else if(n == 1)
-		d[0][0] = 1;
-	else
-		cofactor(a,d,n,det);	// read function
+void Inverse(float cinMatrix[30][30], int sizeMatrix, float determinte, float coutMatrix[30][30], float transposeMatrix[30][30]){
+	if(determinte == 0){
+		printf("\n Inverse of entered matrix is not possible \n");
+	}
+	else if(sizeMatrix == 1){
+		coutMatrix[0][0] = 1;
+	}
+	else {
+		Cofactor(cinMatrix, sizeMatrix, determinte, coutMatrix, transposeMatrix);	// function
+	}
+  return;
 }// end function
 
 //---------------------------------------------------
-//main fuction exe
-int main(void){
-	int i,j,n;
-	float a[100][100],d[100][100],deter;
-	printf("\n C Program To Find Inverse Of Matrix\n\n"); 
-	n = cin(a);	// read function
-	int print_matrix = 1;
-	cout(a,n,print_matrix);	// read function
-	deter = (float) det(a,n);	// read function
-		printf("----------------------------------------------------\n");
-		printf("\n\n Determinant of the Matrix : %.4f ",deter);
-		printf("\n\n-----------------------\n");
-	inverse(a,d,n,deter);	// read function
-	int print_inverse = 2;
-	cout(d,n,print_inverse);	// read function
-		printf("\n\n==============================* THE END *==============================\n");
-		printf("\n		**** Thanks For Using The Program!!! ****\n");
-	getch();
-    return 0;
+//main fuction
+int main(int argc, char **argv){
+	int sizeMatrix,
+		printMatrix = 1,
+		printInverse = 2;
+	float determinte,
+		cinMatrix[30][30],
+		coutMatrix[30][30],
+		transposeMatrix[30][30];
+	printf("\n C Program to find inverse Of matrix \n");
+	sizeMatrix = Cin(cinMatrix, argv, argc);	// function
+	Cout(cinMatrix, sizeMatrix, printMatrix, 0, transposeMatrix);	// function
+	determinte = (float) Determinte(cinMatrix, sizeMatrix);	// function
+	printf("\n ------------------------------ \n");
+	printf("\n Determinant of the matrix : %.2f ", determinte);
+	printf("\n ------------------------------ \n");
+	Inverse(cinMatrix, sizeMatrix, determinte, coutMatrix, transposeMatrix);	// function
+	Cout(coutMatrix, sizeMatrix, printInverse, determinte, transposeMatrix);	// function
+	printf("\n =======* THE END *=======\n");
+	printf("\n *** Thanks for using the program! *** \n");
+  return 0;
 }// end main
